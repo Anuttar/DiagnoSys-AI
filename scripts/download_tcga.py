@@ -116,6 +116,7 @@ def download_pathology_reports(output_dir: str, max_reports: int = 50):
     """Download pathology report PDFs from GDC."""
     output_path = Path(output_dir) / "pathology_reports"
     output_path.mkdir(parents=True, exist_ok=True)
+    root_path = Path(output_dir)
 
     filters = {
         "op": "and",
@@ -140,10 +141,18 @@ def download_pathology_reports(output_dir: str, max_reports: int = 50):
     print(f"Found {len(files)} pathology reports")
 
     downloaded = 0
+    report_index = []
     for f in files:
         file_id = f["file_id"]
         file_name = f.get("file_name", f"{file_id}.pdf")
         save_path = output_path / file_name
+        cases = f.get("cases") or []
+        case_id = cases[0].get("case_id", "") if cases else ""
+        report_index.append({
+            "file_id": file_id,
+            "file_name": file_name,
+            "case_id": case_id,
+        })
 
         if save_path.exists():
             downloaded += 1
@@ -160,6 +169,9 @@ def download_pathology_reports(output_dir: str, max_reports: int = 50):
         except Exception as e:
             print(f"  Failed {file_name}: {e}")
 
+    import pandas as pd
+    pd.DataFrame(report_index).to_csv(root_path / "report_index.csv", index=False)
+    print(f"Saved report index to {root_path / 'report_index.csv'}")
     print(f"Downloaded {downloaded} pathology reports to {output_path}")
 
 
@@ -178,8 +190,7 @@ def main():
 
     print(f"\nTCGA data saved to {args.output_dir}/")
     print("Next steps:")
-    print("  1. Run: python scripts/extract_features.py --source tcga")
-    print("  2. Then retrain with real data")
+    print("  1. Run: python scripts/train_real_tcga.py")
 
 
 if __name__ == "__main__":

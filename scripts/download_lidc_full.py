@@ -10,7 +10,7 @@ The script is resumable: patients already downloaded (complete marker present) a
 Usage:
     python scripts/download_lidc_full.py --output_dir data/raw/lidc
     python scripts/download_lidc_full.py --output_dir data/raw/lidc --limit 50   # partial run
-    python scripts/download_lidc_full.py --output_dir data/raw/lidc --resume     # continue
+    # Re-run the command above to continue an interrupted download.
 """
 
 import sys
